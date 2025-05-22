@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { createClient } from '@supabase/supabase-js';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import LogoGrid from './components/LogoGrid';
@@ -13,11 +12,8 @@ import { Logo, NewLogoData } from './types';
 import { NAV_ITEMS, SearchIcon, PlusIcon, Bars3Icon, Squares2X2Icon, SAMPLE_LOGOS } from './constants';
 import Button from './components/ui/Button';
 import TextField from './components/ui/TextField';
-
-const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-);
+import { supabase } from './lib/supabase';
+import { addLogo } from './lib/supabase';
 
 type ViewMode = 'grid' | 'list';
 
@@ -29,7 +25,7 @@ const App: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
-  const [currentUser, setCurrentUser] = useState(supabase.auth.getUser());
+  const [currentUser, setCurrentUser] = useState(null);
 
   // Modal states
   const [isAddLogoModalOpen, setIsAddLogoModalOpen] = useState<boolean>(false);
@@ -47,10 +43,6 @@ const App: React.FC = () => {
 
     return () => subscription.unsubscribe();
   }, []);
-  
-  useEffect(() => {
-    setAllLogos(SAMPLE_LOGOS);
-  }, []);
 
   const handleToggleAddLogoModal = () => {
     if (!currentUser) {
@@ -61,7 +53,7 @@ const App: React.FC = () => {
   };
 
   const handleOpenPreviewModal = (logoToPreview: Logo | null | undefined) => {
-    if (logoToPreview && logoToPreview.id) { 
+    if (logoToPreview && logoToPreview.id) {
       setSelectedLogoForPreview(logoToPreview);
       setIsPreviewModalOpen(true);
     } else {
@@ -81,7 +73,7 @@ const App: React.FC = () => {
       setIsLoginModalOpen(true);
       return;
     }
-    if (logo && logo.id) { 
+    if (logo && logo.id) {
       setLogoForSharing(logo);
       setIsShareOptionsModalOpen(true);
     } else {
@@ -99,33 +91,30 @@ const App: React.FC = () => {
       setIsLoginModalOpen(true);
       return;
     }
-    
-    setIsLoading(true); 
-    
-    const newLogo: Logo = {
-      id: `local-${Date.now().toString()}-${Math.random().toString(36).substring(2, 9)}`,
-      name: newLogoUIData.name,
-      imageUrl: `https://picsum.photos/seed/${Date.now().toString()}/400/300`, 
-      fontsUsed: newLogoUIData.fonts.map(f => f.name),
-      colors: newLogoUIData.colors.map(c => ({ name: c.name, hex: c.hex_code })),
-      style: undefined,
-      client: newLogoUIData.clientName,
-      categoryName: newLogoUIData.categoryName || 'Uncategorized',
-      status: status,
-      designer: newLogoUIData.designer,
-      studio: newLogoUIData.studio,
-      licences: newLogoUIData.licencesDetails,
-      description: newLogoUIData.description,
-      tags: [],
-      externalLinks: newLogoUIData.externalLinks || [],
-      createdAt: new Date().toISOString(),
-    };
 
-    setAllLogos(prevLogos => [newLogo, ...prevLogos]);
-    console.log("New logo added to local state:", newLogo);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    handleToggleAddLogoModal(); 
-    setIsLoading(false);
+    setIsLoading(true);
+
+    try {
+      const { logo, error } = await addLogo({
+        ...newLogoUIData,
+        status,
+        imageUrl: `https://picsum.photos/seed/${Date.now().toString()}/400/300`,
+      }, currentUser.id);
+
+      if (error) throw error;
+
+      // Update local state with the new logo
+      if (logo) {
+        setAllLogos(prevLogos => [logo, ...prevLogos]);
+      }
+
+      handleToggleAddLogoModal();
+    } catch (error) {
+      console.error('Error adding logo:', error);
+      alert('Failed to add logo. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -136,15 +125,15 @@ const App: React.FC = () => {
     let filteredLogos = [...allLogos];
     
     if (activeNavItem === 'Recent') {
-        filteredLogos.sort((a, b) => {
-            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-            return dateB - dateA;
-        });
+      filteredLogos.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      });
     } else if (activeNavItem === 'Trash') {
-        filteredLogos = [];
+      filteredLogos = [];
     } else if (activeNavItem === 'Starred') {
-        filteredLogos = allLogos.slice(0, 2);
+      filteredLogos = allLogos.slice(0, 2);
     }
 
     if (searchTerm) {
@@ -236,32 +225,32 @@ const App: React.FC = () => {
             <div className="flex justify-start sm:justify-end mt-4">
               <div className="flex items-center gap-1 p-0.5 rounded-md">
                 <Button 
-                    variant={'tertiary'}
-                    size="sm"
-                    onClick={() => setViewMode('list')}
-                    className={`!p-1.5 ${
-                      viewMode === 'list' 
-                        ? 'bg-primary text-primary-contrast border-primary shadow-sm' 
-                        : '!bg-transparent border-transparent text-gray-500 hover:bg-surface-container hover:text-primary'
-                    }`}
-                    aria-pressed={viewMode === 'list'}
-                    aria-label="Switch to list view"
+                  variant={'tertiary'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className={`!p-1.5 ${
+                    viewMode === 'list' 
+                      ? 'bg-primary text-primary-contrast border-primary shadow-sm' 
+                      : '!bg-transparent border-transparent text-gray-500 hover:bg-surface-container hover:text-primary'
+                  }`}
+                  aria-pressed={viewMode === 'list'}
+                  aria-label="Switch to list view"
                 >
-                    <Bars3Icon className="w-4 h-4"/>
+                  <Bars3Icon className="w-4 h-4"/>
                 </Button>
                 <Button 
-                    variant={'tertiary'}
-                    size="sm"
-                    onClick={() => setViewMode('grid')}
-                    className={`!p-1.5 ${
-                      viewMode === 'grid' 
-                        ? 'bg-primary text-primary-contrast border-primary shadow-sm' 
-                        : '!bg-transparent border-transparent text-gray-500 hover:bg-surface-container hover:text-primary'
-                    }`}
-                    aria-pressed={viewMode === 'grid'}
-                    aria-label="Switch to grid view"
+                  variant={'tertiary'}
+                  size="sm"
+                  onClick={() => setViewMode('grid')}
+                  className={`!p-1.5 ${
+                    viewMode === 'grid' 
+                      ? 'bg-primary text-primary-contrast border-primary shadow-sm' 
+                      : '!bg-transparent border-transparent text-gray-500 hover:bg-surface-container hover:text-primary'
+                  }`}
+                  aria-pressed={viewMode === 'grid'}
+                  aria-label="Switch to grid view"
                 >
-                    <Squares2X2Icon className="w-4 h-4"/>
+                  <Squares2X2Icon className="w-4 h-4"/>
                 </Button>
               </div>
             </div>
