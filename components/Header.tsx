@@ -1,31 +1,26 @@
 import React from 'react';
-import { APP_TITLE, AppLogoIcon } from '../constants'; // Import AppLogoIcon
-// Button component is not used if auth buttons are removed
-// import Button from './ui/Button';
-// User type import removed as currentUser is removed
-// import type { User } from 'firebase/auth'; 
+import { APP_TITLE, AppLogoIcon } from '../constants';
+import Button from './ui/Button';
+import { User } from '@supabase/supabase-js';
 
 interface HeaderProps {
-  // Props related to authentication are removed
-  // currentUser: User | null;
-  // onLoginClick: () => void;
-  // onSignupClick: () => void;
-  // onLogoutClick: () => void;
+  currentUser: User | null;
+  onLoginClick: () => void;
+  onSignupClick: () => void;
+  onLogoutClick: () => void;
 }
 
-const Header: React.FC<HeaderProps> = (/* Removed props */) => {
+const Header: React.FC<HeaderProps> = ({ currentUser, onLoginClick, onSignupClick, onLogoutClick }) => {
   return (
     <header className="bg-surface-container sticky top-0 z-30">
       <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 border-b border-outline">
            <div className="flex items-center">
             <a href="/" aria-label={`${APP_TITLE} - Home`}>
-              <AppLogoIcon className="h-7 w-auto text-primary" /> {/* Use h-7 for a bit more padding within h-16 */}
+              <AppLogoIcon className="h-7 w-auto text-primary" />
             </a>
           </div>
           <div className="flex items-center space-x-3">
-            {/* Authentication buttons are removed */}
-            {/* Example:
             {currentUser ? (
               <>
                 <span className="text-sm text-gray-600 hidden sm:block">
@@ -45,7 +40,6 @@ const Header: React.FC<HeaderProps> = (/* Removed props */) => {
                 </Button>
               </>
             )}
-            */}
           </div>
         </div>
       </div>
