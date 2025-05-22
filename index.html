@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>myLogo Dashboard (Local)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              primary: {
+                DEFAULT: 'var(--color-primary-DEFAULT)',
+                light: 'var(--color-primary-light)',
+                dark: 'var(--color-primary-dark)',
+                contrast: 'var(--color-primary-contrast)',
+                textLight: 'var(--color-primary-textLight)',
+              },
+              secondary: {
+                DEFAULT: 'var(--color-secondary-DEFAULT)',
+                light: 'var(--color-secondary-light)',
+                dark: 'var(--color-secondary-dark)',
+                contrast: 'var(--color-secondary-contrast)',
+              },
+              surface: {
+                DEFAULT: 'var(--color-surface-DEFAULT)',
+                variant: 'var(--color-surface-variant)',
+                contrast: 'var(--color-surface-contrast)',
+                container: 'var(--color-surface-container)',
+                containerLow: 'var(--color-surface-container-low)',
+                containerHigh: 'var(--color-surface-container-high)',
+              },
+              outline: 'var(--color-outline)',
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      :root {
+        --color-primary-DEFAULT: #4A55A2; /* M3 Primary - Cool Blue/Purple */
+        --color-primary-light: #7882C4;
+        --color-primary-dark: #2A306A;
+        --color-primary-contrast: #FFFFFF;
+        --color-primary-textLight: #6B7280; /* For lighter text, e.g. form labels */
+
+        --color-secondary-DEFAULT: #775A8C; /* M3 Secondary - Muted Purple */
+        --color-secondary-light: #A688BB;
+        --color-secondary-dark: #4E3663;
+        --color-secondary-contrast: #FFFFFF;
+
+        --color-surface-DEFAULT: #F8F9FA; /* M3 Surface - Very Light Gray */
+        --color-surface-variant: #E9ECEF; /* M3 Surface Variant - Light Gray */
+        --color-surface-contrast: #212529; /* M3 OnSurface - Dark Gray */
+        --color-surface-container: #FFFFFF; /* M3 Surface Container - White */
+        --color-surface-container-low: #F1F3F5; 
+        --color-surface-container-high: #E9ECEF;
+
+        --color-outline: #CED4DA; /* M3 Outline - Gray */
+      }
+      html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family: 'Roboto', sans-serif; /* Material Design font preference */
+        background-color: var(--color-surface-DEFAULT);
+        color: var(--color-surface-contrast);
+      }
+      /* Custom scrollbar for a more modern look */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--color-surface-variant);
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--color-primary-light);
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: var(--color-primary-DEFAULT);
+      }
+    </style>
+    <!-- Roboto Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Heroicons -->
+    <link href="https://cdn.jsdelivr.net/npm/heroicons@latest/css/heroicons.min.css" rel="stylesheet">
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.0",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "firebase/": "https://esm.sh/firebase@^11.8.1/"
+  }
+}
+</script>
+</head>
+  <body>
+    <div id="root" class="h-full"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html><link rel="stylesheet" href="index.css">
+<script src="index.tsx" type="module"></script>
